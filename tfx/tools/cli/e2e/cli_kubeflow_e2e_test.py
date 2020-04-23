@@ -22,6 +22,7 @@ import codecs
 import datetime
 import json
 import locale
+import logging
 import os
 import random
 import shutil
@@ -490,5 +491,5 @@ class CliKubeflowEndToEndTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  absl.logging.set_verbosity(absl.logging.INFO)
+  logging.basicConfig(stream=sys.stdout, level=logging.INFO)
   tf.test.main()

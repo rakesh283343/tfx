@@ -18,8 +18,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import logging
 import os
 import subprocess
+import sys
 
 import absl
 import tensorflow as tf
@@ -320,5 +322,5 @@ class KubeflowGCPIntegrationTest(test_utils.BaseKubeflowTest):
 
 
 if __name__ == '__main__':
-  absl.logging.set_verbosity(absl.logging.INFO)
+  logging.basicConfig(stream=sys.stdout, level=logging.INFO)
   tf.test.main()

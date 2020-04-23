@@ -18,8 +18,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import logging as basic_logging
 import os
 import subprocess
+import sys
 import time
 from typing import List, Text
 
@@ -216,5 +218,5 @@ class KubeflowEndToEndTest(test_utils.BaseKubeflowTest):
 
 
 if __name__ == '__main__':
-  logging.set_verbosity(logging.INFO)
+  basic_logging.basicConfig(stream=sys.stdout, level=basic_logging.INFO)
   tf.test.main()

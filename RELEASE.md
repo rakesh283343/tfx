@@ -12,12 +12,6 @@
 *   Added the experimental function "create_container_component" that
     simplifies creating container-based components.
 *   Removed the incomplete cifar10 example.
-*   Enhanced add_downstream_node / add_upstream_node to apply symmetric changes
-    when being called. This method enables task-based dependencies by enforcing
-    execution order for synchronous pipelines on supported platforms. Currently,
-    the supported platforms are Airflow, Beam, and Kubeflow Pipelines. Note that
-    this API call should be considered experimental, and may not work with
-    asynchronous pipelines, sub-pipelines and pipelines with conditional nodes.
 
 ## Bug fixes and other changes
 
@@ -31,7 +25,6 @@
 *   Fixes unintentional overriding of user-specified setup.py file for Dataflow
     jobs when running on KFP container.
 *   Depends on `frozendict>=1,<2`.
-*   Made ComponentSpec().inputs and .outputs behave more like real dictionaries.
 
 ### Deprecations
 
@@ -50,8 +43,6 @@
     argument, even for DirectRunner. Previously this argument was only required
     for DataflowRunner. Note that the specified value of `--temp_location`
     should point to a Google Cloud Storage bucket.
-*   Converted the BaseNode class attributes to the constructor parameters. This
-    won't affect any components derived from BaseComponent.
 
 ### For pipeline authors
 

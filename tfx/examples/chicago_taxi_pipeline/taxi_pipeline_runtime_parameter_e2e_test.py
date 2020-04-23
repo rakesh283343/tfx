@@ -18,8 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl import logging
-
+import logging
+import sys
 import tensorflow as tf
 
 from tfx.examples.chicago_taxi_pipeline import taxi_pipeline_runtime_parameter
@@ -48,5 +48,5 @@ class TaxiPipelineRuntimeParameterEndToEndTest(test_utils.BaseKubeflowTest):
 
 
 if __name__ == '__main__':
-  logging.set_verbosity(logging.INFO)
+  logging.basicConfig(stream=sys.stdout, level=logging.INFO)
   tf.test.main()
