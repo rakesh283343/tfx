@@ -19,7 +19,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import re
 import tensorflow as tf
 from google.protobuf import json_format
 from ml_metadata.proto import metadata_store_pb2
@@ -120,14 +119,6 @@ class DriverTest(tf.test.TestCase):
     updated_input_base = updated_input_dict['input_base'][0]
     self.assertEqual(3, updated_input_base.id)
     self.assertEqual(self._input_base_path, updated_input_base.uri)
-
-  def testGlobToRegex(self):
-    glob_pattern = 'a(b)c'
-    self.assertEqual(1, re.compile(glob_pattern).groups)
-    regex_pattern = self._example_gen_driver._glob_to_regex(glob_pattern)
-    self.assertEqual(0, re.compile(regex_pattern).groups)
-    self.assertEqual(glob_pattern,
-                     re.match(regex_pattern, glob_pattern).group())
 
   def testSpanNoMatching(self):
     with self.assertRaisesRegexp(ValueError,

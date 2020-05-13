@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import re
 from typing import Text
 # Standard Imports
 
@@ -194,6 +195,14 @@ class UtilsTest(tf.test.TestCase):
         }]
     })
     self.assertEqual(0, len(output_config.split_config.splits))
+
+  def testGlobToRegex(self):
+    glob_pattern = 'a(b)c'
+    self.assertEqual(1, re.compile(glob_pattern).groups)
+    regex_pattern = utils.glob_to_regex(glob_pattern)
+    self.assertEqual(0, re.compile(regex_pattern).groups)
+    self.assertEqual(glob_pattern,
+                     re.match(regex_pattern, glob_pattern).group())
 
 
 if __name__ == '__main__':

@@ -18,13 +18,19 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+import re
 from typing import Any, Dict, List, Text, Union
 
+import absl
 import six
 import tensorflow as tf
 
 from tfx.proto import example_gen_pb2
 from google.protobuf import json_format
+
+# Span spec used in split pattern.
+SPAN_SPEC = '{SPAN}'
 
 _DEFAULT_ENCODING = 'utf-8'
 
@@ -171,3 +177,51 @@ def make_default_output_config(
             example_gen_pb2.SplitConfig.Split(name='train', hash_buckets=2),
             example_gen_pb2.SplitConfig.Split(name='eval', hash_buckets=1)
         ]))
+
+
+def glob_to_regex(glob_pattern: Text) -> Text:
+  """Changes glob pattern to regex pattern."""
+  regex_pattern = glob_pattern
+  regex_pattern = regex_pattern.replace('.', '\\.')
+  regex_pattern = regex_pattern.replace('+', '\\+')
+  regex_pattern = regex_pattern.replace('*', '[^/]*')
+  regex_pattern = regex_pattern.replace('?', '[^/]')
+  regex_pattern = regex_pattern.replace('(', '\\(')
+  regex_pattern = regex_pattern.replace(')', '\\)')
+  return regex_pattern
+
+
+def retrieve_latest_span(uri: Text, split: example_gen_pb2.Input.Split) -> Text:
+  """Retrieves the most recently updated span matching a given split pattern."""
+  split_pattern = os.path.join(uri, split.pattern)
+  assert split_pattern.count(
+      SPAN_SPEC) == 1, 'Only one {SPAN} is allowed in %s' % (
+          split_pattern)
+
+  split_glob_pattern = split_pattern.replace(SPAN_SPEC, '*')
+  absl.logging.info('Glob pattern for split %s: %s' %
+                    (split.name, split_glob_pattern))
+  split_regex_pattern = glob_to_regex(split_pattern).replace(SPAN_SPEC, '(.*)')
+  absl.logging.info('Regex pattern for split %s: %s' %
+                    (split.name, split_regex_pattern))
+  assert re.compile(
+      split_regex_pattern).groups == 1, 'Regex should have only one group'
+
+  files = tf.io.gfile.glob(split_glob_pattern)
+  latest_span = None
+  for file_path in files:
+    result = re.search(split_regex_pattern, file_path)
+    assert result is not None, ('Glob pattern does not match regex pattern')
+    try:
+      span = int(result.group(1))
+    except ValueError:
+      raise ValueError('Cannot not find span number from %s based on %s' %
+                       (file_path, split_regex_pattern))
+    if latest_span is None or span >= int(latest_span):
+      # Uses str instead of int because of zero padding digits.
+      latest_span = result.group(1)
+
+  if latest_span is None:
+    raise ValueError('Cannot not find matching for split %s based on %s' %
+                     (split.name, split.pattern))
+  return latest_span
